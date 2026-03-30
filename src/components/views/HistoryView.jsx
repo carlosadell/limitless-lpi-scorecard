@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { SECTIONS, evaluateKpi, STATUS_COLORS, getAllKpis } from '../../data/kpiDefinitions';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { Trash2, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, ClipboardList } from 'lucide-react';
 
 function MiniTrend({ values }) {
   if (values.length < 2) return null;
@@ -23,9 +25,85 @@ function MiniTrend({ values }) {
 
   return (
     <svg width={width} height={height} className="flex-shrink-0">
-      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="2.5" fill={color} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="2" fill={color} opacity="0.9" />
     </svg>
+  );
+}
+
+function TrendIcon({ values }) {
+  if (values.length < 2) return <Minus size={14} className="text-brand-gray/30" />;
+  const last = values[values.length - 1];
+  const prev = values[values.length - 2];
+  if (last > prev) return <TrendingUp size={14} className="text-green-400/70" />;
+  if (last < prev) return <TrendingDown size={14} className="text-red-400/70" />;
+  return <Minus size={14} className="text-yellow-400/70" />;
+}
+
+function KpiDetailChart({ kpi, trend }) {
+  if (trend.length < 2) return null;
+
+  const greenMin = kpi.green?.min;
+  const redMax = kpi.red?.max;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-white/[0.03]">
+      <ResponsiveContainer width="100%" height={140}>
+        <LineChart data={trend} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }}
+            axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }}
+            axisLine={false}
+            tickLine={false}
+            width={40}
+          />
+          <Tooltip
+            contentStyle={{
+              background: '#111',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '10px',
+              fontSize: '12px',
+              color: '#fff',
+            }}
+            labelStyle={{ color: 'rgba(255,255,255,0.4)' }}
+          />
+          {greenMin != null && !kpi.invertScale && (
+            <ReferenceLine y={greenMin} stroke="rgba(34,197,94,0.2)" strokeDasharray="4 4" />
+          )}
+          {kpi.invertScale && kpi.green?.max != null && (
+            <ReferenceLine y={kpi.green.max} stroke="rgba(34,197,94,0.2)" strokeDasharray="4 4" />
+          )}
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="#2D9CDB"
+            strokeWidth={2}
+            dot={{ fill: '#2D9CDB', r: 3, strokeWidth: 0 }}
+            activeDot={{ fill: '#3DAEE8', r: 5, strokeWidth: 0 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+
+      {/* Data points grid */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mt-3">
+        {trend.map((t, i) => (
+          <div key={i} className="text-center">
+            <p className="text-[10px] text-brand-gray/30">{t.date}</p>
+            <p
+              className="text-[13px] font-semibold tabular-nums"
+              style={{ color: STATUS_COLORS[evaluateKpi(kpi, t.value)].bg }}
+            >
+              {t.value}{kpi.unit}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -56,13 +134,15 @@ export default function HistoryView({ entries, onDelete }) {
 
   if (entries.length === 0) {
     return (
-      <div className="animate-fade-in text-center py-16">
-        <div className="text-4xl mb-4">📋</div>
-        <h2 className="font-display text-lg font-semibold uppercase tracking-wide text-white mb-2">
+      <div className="animate-fade-in text-center py-20">
+        <div className="w-16 h-16 rounded-2xl bg-brand-blue/[0.05] border border-brand-blue/10 flex items-center justify-center mx-auto mb-5">
+          <ClipboardList size={28} className="text-brand-blue/30" />
+        </div>
+        <h2 className="font-display text-lg font-semibold uppercase tracking-wider text-white mb-2">
           No History Yet
         </h2>
-        <p className="text-sm text-brand-gray max-w-xs mx-auto">
-          Start tracking your LPIs weekly and monthly. Your history will appear here so you can see growth over time.
+        <p className="text-[14px] text-brand-gray/40 max-w-xs mx-auto leading-relaxed">
+          Start tracking your LPIs weekly and monthly. Your history and trends will appear here.
         </p>
       </div>
     );
@@ -70,13 +150,13 @@ export default function HistoryView({ entries, onDelete }) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Trend Overview */}
-      <div className="bg-brand-card rounded-2xl p-5 border border-brand-border">
-        <h2 className="font-display text-lg font-semibold uppercase tracking-wide text-white mb-1">
+      {/* Header */}
+      <div className="bg-[#111111] rounded-2xl p-5 border border-white/[0.04]">
+        <h2 className="font-display text-lg font-semibold uppercase tracking-wider text-white mb-1">
           Performance History
         </h2>
-        <p className="text-sm text-brand-gray">
-          {entries.length} scorecard{entries.length !== 1 ? 's' : ''} recorded
+        <p className="text-[13px] text-brand-gray/40">
+          {entries.length} scorecard{entries.length !== 1 ? 's' : ''} recorded — tap any KPI to see trends
         </p>
       </div>
 
@@ -93,40 +173,28 @@ export default function HistoryView({ entries, onDelete }) {
             <button
               key={kpi.id}
               onClick={() => setSelectedKpi(isSelected ? null : kpi.id)}
-              className="w-full text-left bg-brand-card rounded-xl p-4 border border-brand-border hover:border-brand-border/80 transition-all"
+              className="w-full text-left bg-[#111111] rounded-xl p-4 border border-white/[0.04] hover:border-brand-blue/10 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
                 <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ backgroundColor: color.bg }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{kpi.label}</p>
-                  <p className="text-[11px] text-brand-gray">
-                    Latest: {latestVal !== null ? `${latestVal}${kpi.unit}` : '—'}
+                  <p className="text-[13px] font-medium text-white/80 truncate">{kpi.label}</p>
+                  <p className="text-[11px] text-brand-gray/30 mt-0.5">
+                    Latest: <span className="tabular-nums" style={{ color: color.bg }}>{latestVal !== null ? `${latestVal}${kpi.unit}` : '--'}</span>
                   </p>
                 </div>
-                {trend.length >= 2 && <MiniTrend values={trend.map(t => t.value)} />}
+                <div className="flex items-center gap-3">
+                  {trend.length >= 2 && <MiniTrend values={trend.map(t => t.value)} />}
+                  <TrendIcon values={trend.map(t => t.value)} />
+                  {isSelected ? <ChevronUp size={14} className="text-brand-gray/30" /> : <ChevronDown size={14} className="text-brand-gray/20" />}
+                </div>
               </div>
 
-              {/* Expanded detail */}
-              {isSelected && trend.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-brand-border">
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {trend.map((t, i) => (
-                      <div key={i} className="text-center">
-                        <p className="text-[10px] text-brand-gray">{t.date}</p>
-                        <p
-                          className="text-sm font-semibold"
-                          style={{ color: STATUS_COLORS[evaluateKpi(kpi, t.value)].bg }}
-                        >
-                          {t.value}{kpi.unit}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Expanded chart */}
+              {isSelected && <KpiDetailChart kpi={kpi} trend={trend} />}
             </button>
           );
         })}
@@ -134,7 +202,7 @@ export default function HistoryView({ entries, onDelete }) {
 
       {/* Entry List */}
       <div className="space-y-3">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-brand-gray px-1">
+        <h3 className="font-display text-[12px] font-semibold uppercase tracking-[0.15em] text-brand-gray/30 px-1">
           All Entries
         </h3>
         {entries.map(entry => {
@@ -142,12 +210,12 @@ export default function HistoryView({ entries, onDelete }) {
           const date = new Date(entry.date);
 
           return (
-            <div key={entry.id} className="bg-brand-card rounded-xl p-4 border border-brand-border flex items-center justify-between">
+            <div key={entry.id} className="bg-[#111111] rounded-xl p-4 border border-white/[0.04] flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white">
+                <p className="text-[13px] font-medium text-white/70">
                   {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
-                <p className="text-[11px] text-brand-gray mt-0.5">
+                <p className="text-[11px] text-brand-gray/30 mt-0.5">
                   {entry.cadence === 'weekly' ? 'Weekly' : 'Monthly'} — {filledCount} KPIs tracked
                 </p>
               </div>
@@ -156,9 +224,10 @@ export default function HistoryView({ entries, onDelete }) {
                   e.stopPropagation();
                   if (confirm('Delete this entry?')) onDelete(entry.id);
                 }}
-                className="text-xs text-brand-gray hover:text-red-400 transition-colors px-2 py-1"
+                className="text-brand-gray/20 hover:text-red-400/70 transition-colors p-2 rounded-lg hover:bg-red-500/[0.05]"
+                title="Delete entry"
               >
-                Delete
+                <Trash2 size={15} />
               </button>
             </div>
           );

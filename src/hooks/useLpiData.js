@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { sheetsService } from '../services/googleSheets';
 
 const STORAGE_KEY = 'limitless-lpi-data';
 
@@ -22,6 +23,33 @@ function saveData(data) {
 
 export function useLpiData() {
   const [data, setData] = useState(loadData);
+  const [syncing, setSyncing] = useState(false);
+
+  // On mount: try to load from Google Sheets (if enabled)
+  useEffect(() => {
+    if (!sheetsService.isEnabled()) return;
+    let cancelled = false;
+
+    async function syncFromSheets() {
+      setSyncing(true);
+      const remote = await sheetsService.loadAll();
+      if (remote && !cancelled) {
+        const merged = {
+          entries: remote.entries || [],
+          currentWeek: remote.currentWeek || {},
+        };
+        // Only overwrite local if remote has data
+        if (merged.entries.length > 0 || Object.keys(merged.currentWeek).length > 0) {
+          setData(merged);
+          saveData(merged);
+        }
+      }
+      if (!cancelled) setSyncing(false);
+    }
+
+    syncFromSheets();
+    return () => { cancelled = true; };
+  }, []);
 
   const updateCurrentWeek = useCallback((kpiId, value) => {
     setData(prev => {
@@ -30,6 +58,10 @@ export function useLpiData() {
         currentWeek: { ...prev.currentWeek, [kpiId]: value },
       };
       saveData(next);
+      // Debounced sync to Google Sheets (fire and forget)
+      if (sheetsService.isEnabled()) {
+        sheetsService.saveCurrentWeek(next.currentWeek);
+      }
       return next;
     });
   }, []);
@@ -42,13 +74,15 @@ export function useLpiData() {
         cadence,
         values: { ...prev.currentWeek },
       };
-      // Only include KPIs relevant to this cadence
       const next = {
         ...prev,
         entries: [entry, ...prev.entries],
-        // Don't clear — keep values for the other cadence
       };
       saveData(next);
+      // Sync to Google Sheets
+      if (sheetsService.isEnabled()) {
+        sheetsService.saveEntry(entry);
+      }
       return next;
     });
   }, []);
@@ -57,6 +91,9 @@ export function useLpiData() {
     setData(prev => {
       const next = { ...prev, currentWeek: {} };
       saveData(next);
+      if (sheetsService.isEnabled()) {
+        sheetsService.saveCurrentWeek({});
+      }
       return next;
     });
   }, []);
@@ -68,6 +105,9 @@ export function useLpiData() {
         entries: prev.entries.filter(e => e.id !== entryId),
       };
       saveData(next);
+      if (sheetsService.isEnabled()) {
+        sheetsService.deleteEntry(entryId);
+      }
       return next;
     });
   }, []);
@@ -86,5 +126,7 @@ export function useLpiData() {
     clearCurrentWeek,
     deleteEntry,
     resetAll,
+    syncing,
+    sheetsEnabled: sheetsService.isEnabled(),
   };
 }
