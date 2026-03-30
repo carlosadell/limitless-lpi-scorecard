@@ -25,77 +25,75 @@ function MiniTrend({ values }) {
 
   return (
     <svg width={width} height={height} className="flex-shrink-0">
-      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
-      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="2" fill={color} opacity="0.9" />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={color} />
     </svg>
   );
 }
 
 function TrendIcon({ values }) {
-  if (values.length < 2) return <Minus size={14} className="text-brand-gray/30" />;
+  if (values.length < 2) return <Minus size={14} className="text-brand-gray" />;
   const last = values[values.length - 1];
   const prev = values[values.length - 2];
-  if (last > prev) return <TrendingUp size={14} className="text-green-400/70" />;
-  if (last < prev) return <TrendingDown size={14} className="text-red-400/70" />;
-  return <Minus size={14} className="text-yellow-400/70" />;
+  if (last > prev) return <TrendingUp size={14} className="text-green-400" />;
+  if (last < prev) return <TrendingDown size={14} className="text-red-400" />;
+  return <Minus size={14} className="text-yellow-400" />;
 }
 
 function KpiDetailChart({ kpi, trend }) {
   if (trend.length < 2) return null;
 
   const greenMin = kpi.green?.min;
-  const redMax = kpi.red?.max;
 
   return (
-    <div className="mt-4 pt-4 border-t border-white/[0.03]">
+    <div className="mt-4 pt-4 border-t border-brand-border">
       <ResponsiveContainer width="100%" height={140}>
         <LineChart data={trend} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+            tick={{ fontSize: 10, fill: '#9CA3AF' }}
+            axisLine={{ stroke: '#2A2A2A' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }}
+            tick={{ fontSize: 10, fill: '#9CA3AF' }}
             axisLine={false}
             tickLine={false}
             width={40}
           />
           <Tooltip
             contentStyle={{
-              background: '#111',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: '#1A1A1A',
+              border: '1px solid #2A2A2A',
               borderRadius: '10px',
               fontSize: '12px',
               color: '#fff',
             }}
-            labelStyle={{ color: 'rgba(255,255,255,0.4)' }}
+            labelStyle={{ color: '#9CA3AF' }}
           />
           {greenMin != null && !kpi.invertScale && (
-            <ReferenceLine y={greenMin} stroke="rgba(34,197,94,0.2)" strokeDasharray="4 4" />
+            <ReferenceLine y={greenMin} stroke="rgba(34,197,94,0.3)" strokeDasharray="4 4" />
           )}
           {kpi.invertScale && kpi.green?.max != null && (
-            <ReferenceLine y={kpi.green.max} stroke="rgba(34,197,94,0.2)" strokeDasharray="4 4" />
+            <ReferenceLine y={kpi.green.max} stroke="rgba(34,197,94,0.3)" strokeDasharray="4 4" />
           )}
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#2D9CDB"
+            stroke="#FF3333"
             strokeWidth={2}
-            dot={{ fill: '#2D9CDB', r: 3, strokeWidth: 0 }}
-            activeDot={{ fill: '#3DAEE8', r: 5, strokeWidth: 0 }}
+            dot={{ fill: '#FF3333', r: 3, strokeWidth: 0 }}
+            activeDot={{ fill: '#FF4444', r: 5, strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>
 
-      {/* Data points grid */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mt-3">
         {trend.map((t, i) => (
           <div key={i} className="text-center">
-            <p className="text-[10px] text-brand-gray/30">{t.date}</p>
+            <p className="text-[10px] text-brand-gray">{t.date}</p>
             <p
-              className="text-[13px] font-semibold tabular-nums"
+              className="text-sm font-bold tabular-nums"
               style={{ color: STATUS_COLORS[evaluateKpi(kpi, t.value)].bg }}
             >
               {t.value}{kpi.unit}
@@ -111,7 +109,6 @@ export default function HistoryView({ entries, onDelete }) {
   const [selectedKpi, setSelectedKpi] = useState(null);
   const allKpis = getAllKpis();
 
-  // Get unique KPI IDs that have data
   const kpiIdsWithData = new Set();
   entries.forEach(entry => {
     Object.keys(entry.values).forEach(k => {
@@ -121,7 +118,6 @@ export default function HistoryView({ entries, onDelete }) {
     });
   });
 
-  // Build trend data for a specific KPI
   function getTrendData(kpiId) {
     return entries
       .filter(e => e.values[kpiId] !== null && e.values[kpiId] !== undefined)
@@ -129,19 +125,19 @@ export default function HistoryView({ entries, onDelete }) {
         date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         value: parseFloat(e.values[kpiId]),
       }))
-      .reverse(); // oldest first
+      .reverse();
   }
 
   if (entries.length === 0) {
     return (
-      <div className="animate-fade-in text-center py-20">
-        <div className="w-16 h-16 rounded-2xl bg-brand-blue/[0.05] border border-brand-blue/10 flex items-center justify-center mx-auto mb-5">
-          <ClipboardList size={28} className="text-brand-blue/30" />
+      <div className="animate-fade-in text-center py-16">
+        <div className="text-4xl mb-4">
+          <ClipboardList size={48} className="text-brand-red mx-auto" />
         </div>
-        <h2 className="font-display text-lg font-semibold uppercase tracking-wider text-white mb-2">
+        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white mb-2">
           No History Yet
         </h2>
-        <p className="text-[14px] text-brand-gray/40 max-w-xs mx-auto leading-relaxed">
+        <p className="text-sm text-brand-lightGray max-w-xs mx-auto">
           Start tracking your LPIs weekly and monthly. Your history and trends will appear here.
         </p>
       </div>
@@ -150,17 +146,15 @@ export default function HistoryView({ entries, onDelete }) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="bg-[#111111] rounded-2xl p-5 border border-white/[0.04]">
-        <h2 className="font-display text-lg font-semibold uppercase tracking-wider text-white mb-1">
+      <div className="bg-brand-card rounded-2xl p-5 border border-brand-border">
+        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white mb-1">
           Performance History
         </h2>
-        <p className="text-[13px] text-brand-gray/40">
+        <p className="text-sm text-brand-lightGray">
           {entries.length} scorecard{entries.length !== 1 ? 's' : ''} recorded — tap any KPI to see trends
         </p>
       </div>
 
-      {/* KPI Trend Cards */}
       <div className="space-y-2">
         {allKpis.filter(k => kpiIdsWithData.has(k.id)).map(kpi => {
           const trend = getTrendData(kpi.id);
@@ -173,36 +167,34 @@ export default function HistoryView({ entries, onDelete }) {
             <button
               key={kpi.id}
               onClick={() => setSelectedKpi(isSelected ? null : kpi.id)}
-              className="w-full text-left bg-[#111111] rounded-xl p-4 border border-white/[0.04] hover:border-brand-blue/10 transition-all duration-200"
+              className="w-full text-left bg-brand-card rounded-xl p-4 border border-brand-border hover:border-brand-red/30 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
                 <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: color.bg }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-white/80 truncate">{kpi.label}</p>
-                  <p className="text-[11px] text-brand-gray/30 mt-0.5">
-                    Latest: <span className="tabular-nums" style={{ color: color.bg }}>{latestVal !== null ? `${latestVal}${kpi.unit}` : '--'}</span>
+                  <p className="text-sm font-semibold text-white truncate">{kpi.label}</p>
+                  <p className="text-xs text-brand-gray mt-0.5">
+                    Latest: <span className="font-bold tabular-nums" style={{ color: color.bg }}>{latestVal !== null ? `${latestVal}${kpi.unit}` : '—'}</span>
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   {trend.length >= 2 && <MiniTrend values={trend.map(t => t.value)} />}
                   <TrendIcon values={trend.map(t => t.value)} />
-                  {isSelected ? <ChevronUp size={14} className="text-brand-gray/30" /> : <ChevronDown size={14} className="text-brand-gray/20" />}
+                  {isSelected ? <ChevronUp size={14} className="text-brand-gray" /> : <ChevronDown size={14} className="text-brand-gray" />}
                 </div>
               </div>
 
-              {/* Expanded chart */}
               {isSelected && <KpiDetailChart kpi={kpi} trend={trend} />}
             </button>
           );
         })}
       </div>
 
-      {/* Entry List */}
       <div className="space-y-3">
-        <h3 className="font-display text-[12px] font-semibold uppercase tracking-[0.15em] text-brand-gray/30 px-1">
+        <h3 className="font-display text-sm font-bold uppercase tracking-wider text-brand-gray px-1">
           All Entries
         </h3>
         {entries.map(entry => {
@@ -210,12 +202,12 @@ export default function HistoryView({ entries, onDelete }) {
           const date = new Date(entry.date);
 
           return (
-            <div key={entry.id} className="bg-[#111111] rounded-xl p-4 border border-white/[0.04] flex items-center justify-between">
+            <div key={entry.id} className="bg-brand-card rounded-xl p-4 border border-brand-border flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-medium text-white/70">
+                <p className="text-sm font-semibold text-white">
                   {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
-                <p className="text-[11px] text-brand-gray/30 mt-0.5">
+                <p className="text-xs text-brand-gray mt-0.5">
                   {entry.cadence === 'weekly' ? 'Weekly' : 'Monthly'} — {filledCount} KPIs tracked
                 </p>
               </div>
@@ -224,7 +216,7 @@ export default function HistoryView({ entries, onDelete }) {
                   e.stopPropagation();
                   if (confirm('Delete this entry?')) onDelete(entry.id);
                 }}
-                className="text-brand-gray/20 hover:text-red-400/70 transition-colors p-2 rounded-lg hover:bg-red-500/[0.05]"
+                className="text-brand-gray hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10"
                 title="Delete entry"
               >
                 <Trash2 size={15} />

@@ -16,14 +16,14 @@ export default function StatusBadge({ status, size = 'sm' }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-lg font-semibold uppercase tracking-wider ${sizeClasses}`}
+      className={`inline-flex items-center rounded-full font-bold uppercase tracking-wider ${sizeClasses}`}
       style={{
-        backgroundColor: `${color.bg}0D`,
+        backgroundColor: `${color.bg}20`,
         color: color.bg,
-        border: `1px solid ${color.bg}20`,
+        border: `1px solid ${color.bg}40`,
       }}
     >
-      <Icon size={iconSize} strokeWidth={2.2} />
+      <Icon size={iconSize} strokeWidth={2.5} />
       {color.label}
     </span>
   );

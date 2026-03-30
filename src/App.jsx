@@ -31,7 +31,7 @@ export default function App() {
       return;
     }
     submitEntry(cadence);
-    showToast(`${cadence === 'weekly' ? 'Weekly' : 'Monthly'} scorecard saved.`);
+    showToast(`${cadence === 'weekly' ? 'Weekly' : 'Monthly'} scorecard saved!`);
     setActiveView('dashboard');
   }, [currentWeek, submitEntry, showToast]);
 
@@ -64,15 +64,15 @@ export default function App() {
 
       <Footer />
 
-      {/* Toast notification */}
+      {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl px-5 py-3 shadow-2xl shadow-black/50 flex items-center gap-2.5">
+          <div className="bg-brand-card border border-brand-border rounded-xl px-5 py-3 shadow-xl flex items-center gap-2.5">
             {toast.type === 'error'
-              ? <AlertCircle size={16} className="text-red-400/70 flex-shrink-0" />
-              : <CheckCircle2 size={16} className="text-green-400/70 flex-shrink-0" />
+              ? <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
+              : <CheckCircle2 size={16} className="text-green-400 flex-shrink-0" />
             }
-            <p className="text-[13px] text-white/70 font-medium">{toast.message}</p>
+            <p className="text-sm text-white font-medium">{toast.message}</p>
           </div>
         </div>
       )}
