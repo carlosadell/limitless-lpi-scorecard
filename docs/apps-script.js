@@ -1,5 +1,5 @@
 /**
- * LPI Scorecard — Google Apps Script Backend (v3 — Multi-User with Passwords)
+ * LPI Scorecard — Google Apps Script Backend (v4 — Multi-User + Passwords + Daily Log)
  *
  * SETUP INSTRUCTIONS:
  * 1. Open your existing LPI Google Sheet
@@ -7,17 +7,18 @@
  * 3. Delete ALL existing code and paste this entire file
  * 4. Click Deploy > Manage Deployments > Edit (pencil icon)
  * 5. Set version to "New version" and click Deploy
- *    (This updates the existing Web App URL — no need to change anything in Vercel)
  *
  * SHEET STRUCTURE (auto-created):
- * Sheet "Users"   — columns: email | name | password | createdAt | lastLogin
- * Sheet "Entries" — columns: email | id | date | cadence | values (JSON string)
- * Sheet "Current" — columns: email | key | value
+ * Sheet "Users"    — columns: email | name | password | createdAt | lastLogin
+ * Sheet "Entries"  — columns: email | id | date | cadence | values (JSON string)
+ * Sheet "Current"  — columns: email | key | value
+ * Sheet "DailyLog" — columns: email | weekId | dailyData (JSON string)
  */
 
 const USERS_SHEET = 'Users';
 const ENTRIES_SHEET = 'Entries';
 const CURRENT_SHEET = 'Current';
+const DAILY_SHEET = 'DailyLog';
 
 function getOrCreateSheet(name) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -30,21 +31,21 @@ function getOrCreateSheet(name) {
       sheet.appendRow(['email', 'id', 'date', 'cadence', 'values']);
     } else if (name === CURRENT_SHEET) {
       sheet.appendRow(['email', 'key', 'value']);
+    } else if (name === DAILY_SHEET) {
+      sheet.appendRow(['email', 'weekId', 'dailyData']);
     }
   }
   return sheet;
 }
 
-// Simple hash function for passwords (not cryptographic, but good enough
-// to avoid storing plain text in the sheet)
+// Simple hash function for passwords
 function simpleHash(str) {
   var hash = 0;
   for (var i = 0; i < str.length; i++) {
     var char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
+    hash = hash & hash;
   }
-  // Convert to positive hex string
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
@@ -60,7 +61,6 @@ function doPost(e) {
       return handleLogin(email, body.password || '');
     }
 
-    // All other actions require an email
     if (!email) {
       return jsonResponse({ error: 'Email is required' });
     }
@@ -73,6 +73,10 @@ function doPost(e) {
       return handleDelete(email, body.entryId);
     } else if (action === 'saveCurrent') {
       return handleSaveCurrent(email, body.data);
+    } else if (action === 'loadDaily') {
+      return handleLoadDaily(email, body.weekId);
+    } else if (action === 'saveDaily') {
+      return handleSaveDaily(email, body.weekId, body.dailyData);
     }
 
     return jsonResponse({ error: 'Unknown action' });
@@ -82,52 +86,36 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return jsonResponse({ status: 'LPI Scorecard API v3' });
+  return jsonResponse({ status: 'LPI Scorecard API v4' });
 }
 
 // ─── SIGN UP ────────────────────────────────────────────────────────
 
 function handleSignup(email, name, password) {
-  if (!email) {
-    return jsonResponse({ error: 'Email is required' });
-  }
-  if (!password) {
-    return jsonResponse({ error: 'Password is required' });
-  }
-  if (!name) {
-    return jsonResponse({ error: 'Name is required' });
-  }
+  if (!email) return jsonResponse({ error: 'Email is required' });
+  if (!password) return jsonResponse({ error: 'Password is required' });
+  if (!name) return jsonResponse({ error: 'Name is required' });
 
   const sheet = getOrCreateSheet(USERS_SHEET);
   const data = sheet.getDataRange().getValues();
   const now = new Date().toISOString();
 
-  // Check if user already exists
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).toLowerCase().trim() === email) {
       return jsonResponse({ error: 'An account with this email already exists. Please sign in.' });
     }
   }
 
-  // Create new user with hashed password
   const hashedPassword = simpleHash(password);
   sheet.appendRow([email, name, hashedPassword, now, now]);
-
-  return jsonResponse({
-    success: true,
-    user: { email: email, name: name },
-  });
+  return jsonResponse({ success: true, user: { email: email, name: name } });
 }
 
 // ─── LOGIN ──────────────────────────────────────────────────────────
 
 function handleLogin(email, password) {
-  if (!email) {
-    return jsonResponse({ error: 'Email is required' });
-  }
-  if (!password) {
-    return jsonResponse({ error: 'Password is required' });
-  }
+  if (!email) return jsonResponse({ error: 'Email is required' });
+  if (!password) return jsonResponse({ error: 'Password is required' });
 
   const sheet = getOrCreateSheet(USERS_SHEET);
   const data = sheet.getDataRange().getValues();
@@ -136,33 +124,23 @@ function handleLogin(email, password) {
 
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).toLowerCase().trim() === email) {
-      const storedHash = String(data[i][2]);
-
-      // Check password
-      if (storedHash !== hashedPassword) {
+      if (String(data[i][2]) !== hashedPassword) {
         return jsonResponse({ error: 'Incorrect password.' });
       }
-
-      // Update lastLogin
       sheet.getRange(i + 1, 5).setValue(now);
-
-      return jsonResponse({
-        success: true,
-        user: { email: email, name: data[i][1] },
-      });
+      return jsonResponse({ success: true, user: { email: email, name: data[i][1] } });
     }
   }
 
   return jsonResponse({ error: 'No account found with this email. Please sign up first.' });
 }
 
-// ─── LOAD (scoped by email) ─────────────────────────────────────────
+// ─── LOAD ENTRIES (scoped by email) ─────────────────────────────────
 
 function handleLoad(email) {
   const entriesSheet = getOrCreateSheet(ENTRIES_SHEET);
   const currentSheet = getOrCreateSheet(CURRENT_SHEET);
 
-  // Load entries for this user
   const entriesData = entriesSheet.getDataRange().getValues();
   const entries = [];
   for (let i = 1; i < entriesData.length; i++) {
@@ -177,7 +155,6 @@ function handleLoad(email) {
     }
   }
 
-  // Load current week for this user
   const currentData = currentSheet.getDataRange().getValues();
   const currentWeek = {};
   for (let i = 1; i < currentData.length; i++) {
@@ -187,36 +164,25 @@ function handleLoad(email) {
     }
   }
 
-  // Return newest first
   entries.reverse();
-
   return jsonResponse({ entries, currentWeek });
 }
 
-// ─── SAVE ENTRY (scoped by email) ───────────────────────────────────
+// ─── SAVE ENTRY ─────────────────────────────────────────────────────
 
 function handleSave(email, entry) {
   const sheet = getOrCreateSheet(ENTRIES_SHEET);
-  sheet.appendRow([
-    email,
-    entry.id,
-    entry.date,
-    entry.cadence,
-    JSON.stringify(entry.values),
-  ]);
+  sheet.appendRow([email, entry.id, entry.date, entry.cadence, JSON.stringify(entry.values)]);
   return jsonResponse({ success: true });
 }
 
-// ─── DELETE ENTRY (scoped by email) ─────────────────────────────────
+// ─── DELETE ENTRY ───────────────────────────────────────────────────
 
 function handleDelete(email, entryId) {
   const sheet = getOrCreateSheet(ENTRIES_SHEET);
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (
-      String(data[i][0]).toLowerCase().trim() === email &&
-      String(data[i][1]) === String(entryId)
-    ) {
+    if (String(data[i][0]).toLowerCase().trim() === email && String(data[i][1]) === String(entryId)) {
       sheet.deleteRow(i + 1);
       break;
     }
@@ -224,20 +190,16 @@ function handleDelete(email, entryId) {
   return jsonResponse({ success: true });
 }
 
-// ─── SAVE CURRENT WEEK (scoped by email) ────────────────────────────
+// ─── SAVE CURRENT WEEK ─────────────────────────────────────────────
 
 function handleSaveCurrent(email, data) {
   const sheet = getOrCreateSheet(CURRENT_SHEET);
   const existing = sheet.getDataRange().getValues();
-
-  // Remove old rows for this user
   for (let i = existing.length - 1; i >= 1; i--) {
     if (String(existing[i][0]).toLowerCase().trim() === email) {
       sheet.deleteRow(i + 1);
     }
   }
-
-  // Write new rows
   const keys = Object.keys(data || {});
   for (const key of keys) {
     const val = data[key];
@@ -245,6 +207,41 @@ function handleSaveCurrent(email, data) {
       sheet.appendRow([email, key, val]);
     }
   }
+  return jsonResponse({ success: true });
+}
+
+// ─── LOAD DAILY LOG ─────────────────────────────────────────────────
+
+function handleLoadDaily(email, weekId) {
+  const sheet = getOrCreateSheet(DAILY_SHEET);
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (String(row[0]).toLowerCase().trim() === email && String(row[1]) === weekId) {
+      return jsonResponse({ dailyData: JSON.parse(row[2] || '{}') });
+    }
+  }
+
+  return jsonResponse({ dailyData: {} });
+}
+
+// ─── SAVE DAILY LOG ─────────────────────────────────────────────────
+
+function handleSaveDaily(email, weekId, dailyData) {
+  const sheet = getOrCreateSheet(DAILY_SHEET);
+  const data = sheet.getDataRange().getValues();
+
+  // Update existing row or append new one
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase().trim() === email && String(data[i][1]) === weekId) {
+      sheet.getRange(i + 1, 3).setValue(JSON.stringify(dailyData));
+      return jsonResponse({ success: true });
+    }
+  }
+
+  // New row
+  sheet.appendRow([email, weekId, JSON.stringify(dailyData)]);
   return jsonResponse({ success: true });
 }
 

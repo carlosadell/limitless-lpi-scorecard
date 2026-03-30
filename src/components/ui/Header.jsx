@@ -1,7 +1,8 @@
-import { BarChart3, CalendarDays, CalendarCheck, History, LogOut, User } from 'lucide-react';
+import { BarChart3, CalendarDays, Calendar, CalendarCheck, History, LogOut, User } from 'lucide-react';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+  { id: 'daily', label: 'Daily', icon: Calendar },
   { id: 'weekly', label: 'Weekly', icon: CalendarDays },
   { id: 'monthly', label: 'Monthly', icon: CalendarCheck },
   { id: 'history', label: 'History', icon: History },

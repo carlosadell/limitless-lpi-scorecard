@@ -1,12 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Header from './components/ui/Header';
 import Footer from './components/ui/Footer';
 import DashboardView from './components/views/DashboardView';
+import DailyView from './components/views/DailyView';
 import WeeklyView from './components/views/WeeklyView';
 import MonthlyView from './components/views/MonthlyView';
 import HistoryView from './components/views/HistoryView';
 import AuthScreen from './components/views/AuthScreen';
 import { useLpiData } from './hooks/useLpiData';
+import { useDailyLog } from './hooks/useDailyLog';
 import { sheetsService } from './services/googleSheets';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -44,6 +46,30 @@ export default function App() {
     deleteEntry,
   } = useLpiData(user?.email);
 
+  const {
+    dailyData,
+    weekDays,
+    weekId,
+    updateDaily,
+    getWeeklyTotals,
+  } = useDailyLog(user?.email);
+
+  // When switching to Weekly view, pre-fill from daily totals
+  const dailyTotals = getWeeklyTotals();
+
+  // Auto-populate weekly fields from daily totals when they change
+  useEffect(() => {
+    if (!user?.email) return;
+    const totals = dailyTotals;
+    for (const [kpiId, total] of Object.entries(totals)) {
+      // Only pre-fill if the user hasn't manually entered a value in the weekly view
+      if (currentWeek[kpiId] === undefined || currentWeek[kpiId] === null) {
+        updateCurrentWeek(kpiId, total);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekId]); // Only run when week changes, not on every daily update
+
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -76,13 +102,11 @@ export default function App() {
           return;
         }
 
-        // Unexpected response
         setAuthError('Something went wrong. Please try again.');
         setAuthLoading(false);
         return;
       }
 
-      // Fallback: Google Sheets not configured, just store locally
       const userData = { name: name || email.split('@')[0], email };
       setUser(userData);
       saveUser(userData);
@@ -111,7 +135,15 @@ export default function App() {
     setActiveView('dashboard');
   }, [currentWeek, submitEntry, showToast]);
 
-  // Show auth screen if not logged in
+  // Apply daily totals to weekly (user-triggered from Daily view or Weekly view)
+  const applyDailyTotals = useCallback(() => {
+    const totals = getWeeklyTotals();
+    for (const [kpiId, total] of Object.entries(totals)) {
+      updateCurrentWeek(kpiId, total);
+    }
+    showToast('Daily totals applied to weekly scorecard!');
+  }, [getWeeklyTotals, updateCurrentWeek, showToast]);
+
   if (!user) {
     return <AuthScreen onLogin={handleLogin} loading={authLoading} error={authError} />;
   }
@@ -124,11 +156,25 @@ export default function App() {
         {activeView === 'dashboard' && (
           <DashboardView currentValues={currentWeek} entries={entries} user={user} />
         )}
+        {activeView === 'daily' && (
+          <DailyView
+            dailyData={dailyData}
+            weekDays={weekDays}
+            weekId={weekId}
+            onUpdateDaily={updateDaily}
+            onGoToWeekly={() => {
+              applyDailyTotals();
+              setActiveView('weekly');
+            }}
+          />
+        )}
         {activeView === 'weekly' && (
           <WeeklyView
             currentValues={currentWeek}
             onUpdate={updateCurrentWeek}
             onSubmit={handleSubmit}
+            dailyTotals={dailyTotals}
+            onApplyDailyTotals={applyDailyTotals}
           />
         )}
         {activeView === 'monthly' && (

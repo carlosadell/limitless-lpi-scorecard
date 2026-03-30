@@ -16,6 +16,52 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Premium layered background ─────────────────────────────────── */
+#root {
+  position: relative;
+  min-height: 100vh;
+}
+
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    /* Top-center red glow */
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 51, 51, 0.06) 0%, transparent 70%),
+    /* Bottom-left warm glow */
+    radial-gradient(ellipse 50% 50% at 10% 100%, rgba(255, 51, 51, 0.04) 0%, transparent 60%),
+    /* Right-center subtle accent */
+    radial-gradient(ellipse 40% 60% at 95% 40%, rgba(45, 156, 219, 0.03) 0%, transparent 60%),
+    /* Centered subtle vignette */
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(26, 26, 26, 0.5) 0%, transparent 70%);
+}
+
+/* Subtle grid texture overlay */
+#root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 70%);
+}
+
+/* Ensure content sits above the background layers */
+#root > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -27,6 +73,7 @@ body {
   border-radius: 3px;
 }
 
+/* ─── Number input cleanup ───────────────────────────────────────── */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -36,6 +83,7 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* ─── Animations ─────────────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -51,6 +99,16 @@ input[type="number"] {
   50% { box-shadow: 0 0 12px 4px rgba(255, 51, 51, 0.15); }
 }
 
+@keyframes pulse-blue {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 156, 219, 0.3); }
+  50% { box-shadow: 0 0 16px 4px rgba(45, 156, 219, 0.12); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -61,11 +119,6 @@ input[type="number"] {
 
 .pulse-red {
   animation: pulse-red 2s ease-in-out infinite;
-}
-
-@keyframes pulse-blue {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 156, 219, 0.3); }
-  50% { box-shadow: 0 0 16px 4px rgba(45, 156, 219, 0.12); }
 }
 
 .pulse-blue {

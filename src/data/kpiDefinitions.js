@@ -14,14 +14,14 @@ export const SECTIONS = {
         {
           id: 'new-patients-week',
           label: 'FFS New Patients / Week',
-          target: '4–8',
+          target: '8–14',
           unit: '',
           inputType: 'number',
           description: 'The number of new fee-for-service patients who visited your practice this week. This is your growth engine — without new patients, you cannot scale. Count only patients who actually showed up, not just scheduled.',
           formula: 'Total new FFS patients seen this week (exclude insurance-only if applicable)',
-          green: { min: 4, max: null, label: '≥ 4' },
-          yellow: { min: 2, max: 3, label: '2–3' },
-          red: { min: null, max: 1, label: '≤ 1' },
+          green: { min: 8, max: null, label: '≥ 8' },
+          yellow: { min: 6, max: 7, label: '6–7' },
+          red: { min: null, max: 5, label: '≤ 5' },
           ifRed: 'Audit lead sources + front desk call conversion. Review recorded calls if available.',
         },
         {
