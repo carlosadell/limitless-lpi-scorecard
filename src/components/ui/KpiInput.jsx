@@ -1,25 +1,69 @@
 import { evaluateKpi, STATUS_COLORS } from '../../data/kpiDefinitions';
 import StatusBadge from './StatusBadge';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Info, ChevronDown, ChevronUp, AlertTriangle, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
-function Tooltip({ kpi, isOpen, onClose, triggerRef }) {
+function HoverTooltip({ kpi, triggerRef, onClose }) {
+  const ref = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const tooltipWidth = 320;
+      let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+      // Keep tooltip within viewport
+      if (left < 12) left = 12;
+      if (left + tooltipWidth > window.innerWidth - 12) left = window.innerWidth - 12 - tooltipWidth;
+      setPosition({
+        top: rect.bottom + 8,
+        left,
+      });
+    }
+  }, [triggerRef]);
+
+  return createPortal(
+    <div
+      ref={ref}
+      className="fixed z-[9999] w-80 animate-fade-in pointer-events-none"
+      style={{ top: position.top, left: position.left }}
+    >
+      <div className="bg-brand-dark border border-brand-border rounded-xl p-4 shadow-2xl">
+        <p className="text-xs font-bold text-brand-red uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <Info size={12} />
+          What is this?
+        </p>
+        <p className="text-sm text-brand-lightGray leading-relaxed">{kpi.description}</p>
+        {kpi.formula && (
+          <div className="bg-brand-black rounded-lg px-3 py-2 border border-brand-border mt-3">
+            <p className="text-[10px] text-brand-red uppercase tracking-widest mb-1 font-bold">Formula</p>
+            <p className="text-xs text-white font-mono leading-relaxed">{kpi.formula}</p>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function MobileTooltip({ kpi, onClose }) {
   const ref = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target) && triggerRef.current && !triggerRef.current.contains(e.target)) {
+      if (ref.current && !ref.current.contains(e.target)) {
         onClose();
       }
     }
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose, triggerRef]);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [onClose]);
 
-  if (!isOpen) return null;
-
-  // Use a portal so the tooltip renders on top of everything
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
       <div className="fixed inset-0 bg-black/60" />
@@ -52,14 +96,51 @@ function Tooltip({ kpi, isOpen, onClose, triggerRef }) {
   );
 }
 
+// Detect touch device
+function isTouchDevice() {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
 export default function KpiInput({ kpi, value, onChange }) {
   const [showAction, setShowAction] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [hoverTooltip, setHoverTooltip] = useState(false);
+  const [mobileTooltip, setMobileTooltip] = useState(false);
   const triggerRef = useRef(null);
+  const hoverTimeoutRef = useRef(null);
   const status = evaluateKpi(kpi, value);
   const color = STATUS_COLORS[status];
 
   const borderColor = status === 'none' ? '#2A2A2A' : color.bg;
+
+  const handleMouseEnter = useCallback(() => {
+    if (isTouchDevice()) return;
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverTooltip(true);
+    }, 200); // small delay to avoid flickering
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setHoverTooltip(false);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (isTouchDevice()) {
+      setMobileTooltip(true);
+    }
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div
@@ -76,7 +157,9 @@ export default function KpiInput({ kpi, value, onChange }) {
             {kpi.description && (
               <button
                 ref={triggerRef}
-                onClick={() => setShowTooltip(!showTooltip)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onClick={handleClick}
                 className="flex-shrink-0 text-brand-gray hover:text-brand-red transition-colors duration-200"
                 title="Learn more about this KPI"
               >
@@ -91,8 +174,15 @@ export default function KpiInput({ kpi, value, onChange }) {
         <StatusBadge status={status} size="lg" />
       </div>
 
-      {/* Tooltip as portal overlay */}
-      <Tooltip kpi={kpi} isOpen={showTooltip} onClose={() => setShowTooltip(false)} triggerRef={triggerRef} />
+      {/* Desktop hover tooltip */}
+      {hoverTooltip && !isTouchDevice() && (
+        <HoverTooltip kpi={kpi} triggerRef={triggerRef} onClose={() => setHoverTooltip(false)} />
+      )}
+
+      {/* Mobile tap tooltip (modal) */}
+      {mobileTooltip && (
+        <MobileTooltip kpi={kpi} onClose={() => setMobileTooltip(false)} />
+      )}
 
       <div className="flex flex-wrap items-center gap-3 mt-4">
         <div className="relative flex-1 max-w-[180px]">

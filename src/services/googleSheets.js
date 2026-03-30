@@ -1,7 +1,4 @@
-// Google Sheets integration via Google Apps Script Web App (v2 — Multi-User)
-//
-// All requests include the user's email to scope data per user.
-// The Apps Script backend filters entries/current by email.
+// Google Sheets integration via Google Apps Script Web App (v3 — Multi-User with Passwords)
 
 const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || '';
 
@@ -20,24 +17,28 @@ class GoogleSheetsService {
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' }, // Apps Script requires this for CORS
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.error) {
-        console.error('Google Sheets error:', data.error);
-        return null;
+        return { error: data.error };
       }
       return data;
     } catch (err) {
       console.error('Google Sheets sync failed:', err);
-      return null;
+      return { error: 'Connection failed. Please try again.' };
     }
   }
 
-  // Login / register — returns { success, user: { email, name }, isNew }
-  async login(email, name) {
-    return this._post({ action: 'login', email, name });
+  // Sign up — creates a new user account
+  async signup(email, name, password) {
+    return this._post({ action: 'signup', email, name, password });
+  }
+
+  // Login — verifies email + password
+  async login(email, password) {
+    return this._post({ action: 'login', email, password });
   }
 
   // Load all entries + currentWeek for a specific user

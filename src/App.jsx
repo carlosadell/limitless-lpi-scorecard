@@ -32,6 +32,7 @@ function saveUser(user) {
 export default function App() {
   const [user, setUser] = useState(loadUser);
   const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [activeView, setActiveView] = useState('dashboard');
   const [toast, setToast] = useState(null);
 
@@ -48,12 +49,25 @@ export default function App() {
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const handleLogin = useCallback(async ({ name, email }) => {
+  const handleLogin = useCallback(async ({ name, email, password, isSignUp }) => {
     setAuthLoading(true);
+    setAuthError('');
+
     try {
-      // Try to register/login via Google Sheets
       if (sheetsService.isEnabled()) {
-        const result = await sheetsService.login(email, name);
+        let result;
+        if (isSignUp) {
+          result = await sheetsService.signup(email, name, password);
+        } else {
+          result = await sheetsService.login(email, password);
+        }
+
+        if (result && result.error) {
+          setAuthError(result.error);
+          setAuthLoading(false);
+          return;
+        }
+
         if (result && result.success) {
           const userData = { name: result.user.name, email: result.user.email };
           setUser(userData);
@@ -61,17 +75,20 @@ export default function App() {
           setAuthLoading(false);
           return;
         }
+
+        // Unexpected response
+        setAuthError('Something went wrong. Please try again.');
+        setAuthLoading(false);
+        return;
       }
-      // Fallback: just store locally
-      const userData = { name, email };
+
+      // Fallback: Google Sheets not configured, just store locally
+      const userData = { name: name || email.split('@')[0], email };
       setUser(userData);
       saveUser(userData);
     } catch (err) {
       console.error('Login error:', err);
-      // Fallback to local
-      const userData = { name, email };
-      setUser(userData);
-      saveUser(userData);
+      setAuthError('Connection failed. Please try again.');
     }
     setAuthLoading(false);
   }, []);
@@ -80,6 +97,7 @@ export default function App() {
     setUser(null);
     saveUser(null);
     setActiveView('dashboard');
+    setAuthError('');
   }, []);
 
   const handleSubmit = useCallback((cadence) => {
@@ -95,7 +113,7 @@ export default function App() {
 
   // Show auth screen if not logged in
   if (!user) {
-    return <AuthScreen onLogin={handleLogin} loading={authLoading} />;
+    return <AuthScreen onLogin={handleLogin} loading={authLoading} error={authError} />;
   }
 
   return (

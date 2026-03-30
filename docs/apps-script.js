@@ -1,5 +1,5 @@
 /**
- * LPI Scorecard — Google Apps Script Backend (v2 — Multi-User)
+ * LPI Scorecard — Google Apps Script Backend (v3 — Multi-User with Passwords)
  *
  * SETUP INSTRUCTIONS:
  * 1. Open your existing LPI Google Sheet
@@ -10,7 +10,7 @@
  *    (This updates the existing Web App URL — no need to change anything in Vercel)
  *
  * SHEET STRUCTURE (auto-created):
- * Sheet "Users"   — columns: email | name | createdAt | lastLogin
+ * Sheet "Users"   — columns: email | name | password | createdAt | lastLogin
  * Sheet "Entries" — columns: email | id | date | cadence | values (JSON string)
  * Sheet "Current" — columns: email | key | value
  */
@@ -25,7 +25,7 @@ function getOrCreateSheet(name) {
   if (!sheet) {
     sheet = ss.insertSheet(name);
     if (name === USERS_SHEET) {
-      sheet.appendRow(['email', 'name', 'createdAt', 'lastLogin']);
+      sheet.appendRow(['email', 'name', 'password', 'createdAt', 'lastLogin']);
     } else if (name === ENTRIES_SHEET) {
       sheet.appendRow(['email', 'id', 'date', 'cadence', 'values']);
     } else if (name === CURRENT_SHEET) {
@@ -35,14 +35,29 @@ function getOrCreateSheet(name) {
   return sheet;
 }
 
+// Simple hash function for passwords (not cryptographic, but good enough
+// to avoid storing plain text in the sheet)
+function simpleHash(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    var char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  // Convert to positive hex string
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
     const action = body.action;
     const email = (body.email || '').toLowerCase().trim();
 
-    if (action === 'login') {
-      return handleLogin(email, body.name || '');
+    if (action === 'signup') {
+      return handleSignup(email, body.name || '', body.password || '');
+    } else if (action === 'login') {
+      return handleLogin(email, body.password || '');
     }
 
     // All other actions require an email
@@ -67,43 +82,78 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return jsonResponse({ status: 'LPI Scorecard API v2 — Multi-User' });
+  return jsonResponse({ status: 'LPI Scorecard API v3' });
 }
 
-// ─── LOGIN / REGISTER ───────────────────────────────────────────────
+// ─── SIGN UP ────────────────────────────────────────────────────────
 
-function handleLogin(email, name) {
+function handleSignup(email, name, password) {
   if (!email) {
     return jsonResponse({ error: 'Email is required' });
+  }
+  if (!password) {
+    return jsonResponse({ error: 'Password is required' });
+  }
+  if (!name) {
+    return jsonResponse({ error: 'Name is required' });
   }
 
   const sheet = getOrCreateSheet(USERS_SHEET);
   const data = sheet.getDataRange().getValues();
   const now = new Date().toISOString();
 
-  // Check if user exists
+  // Check if user already exists
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).toLowerCase().trim() === email) {
-      // Update name (if provided and different) and lastLogin
-      const existingName = data[i][1];
-      const displayName = name || existingName;
-      sheet.getRange(i + 1, 2).setValue(displayName); // update name
-      sheet.getRange(i + 1, 4).setValue(now);          // update lastLogin
+      return jsonResponse({ error: 'An account with this email already exists. Please sign in.' });
+    }
+  }
+
+  // Create new user with hashed password
+  const hashedPassword = simpleHash(password);
+  sheet.appendRow([email, name, hashedPassword, now, now]);
+
+  return jsonResponse({
+    success: true,
+    user: { email: email, name: name },
+  });
+}
+
+// ─── LOGIN ──────────────────────────────────────────────────────────
+
+function handleLogin(email, password) {
+  if (!email) {
+    return jsonResponse({ error: 'Email is required' });
+  }
+  if (!password) {
+    return jsonResponse({ error: 'Password is required' });
+  }
+
+  const sheet = getOrCreateSheet(USERS_SHEET);
+  const data = sheet.getDataRange().getValues();
+  const now = new Date().toISOString();
+  const hashedPassword = simpleHash(password);
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase().trim() === email) {
+      const storedHash = String(data[i][2]);
+
+      // Check password
+      if (storedHash !== hashedPassword) {
+        return jsonResponse({ error: 'Incorrect password.' });
+      }
+
+      // Update lastLogin
+      sheet.getRange(i + 1, 5).setValue(now);
+
       return jsonResponse({
         success: true,
-        user: { email: email, name: displayName },
-        isNew: false,
+        user: { email: email, name: data[i][1] },
       });
     }
   }
 
-  // New user — register
-  sheet.appendRow([email, name, now, now]);
-  return jsonResponse({
-    success: true,
-    user: { email: email, name: name },
-    isNew: true,
-  });
+  return jsonResponse({ error: 'No account found with this email. Please sign up first.' });
 }
 
 // ─── LOAD (scoped by email) ─────────────────────────────────────────
