@@ -1,17 +1,7 @@
-// Google Sheets integration via Google Apps Script Web App
+// Google Sheets integration via Google Apps Script Web App (v2 — Multi-User)
 //
-// HOW TO SET UP:
-// 1. Create a Google Sheet
-// 2. Go to Extensions > Apps Script
-// 3. Paste the Apps Script code (see /docs/apps-script.js)
-// 4. Deploy as Web App (Execute as: Me, Access: Anyone)
-// 5. Copy the deployment URL and set it below or in environment
-//
-// The Apps Script acts as a simple REST API:
-//   POST /exec { action: 'save', entry: {...} }    → saves an entry
-//   POST /exec { action: 'load' }                  → returns all entries
-//   POST /exec { action: 'delete', entryId: '...'} → deletes an entry
-//   POST /exec { action: 'saveCurrent', data: {} } → saves current week values
+// All requests include the user's email to scope data per user.
+// The Apps Script backend filters entries/current by email.
 
 const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || '';
 
@@ -45,20 +35,29 @@ class GoogleSheetsService {
     }
   }
 
-  async loadAll() {
-    return this._post({ action: 'load' });
+  // Login / register — returns { success, user: { email, name }, isNew }
+  async login(email, name) {
+    return this._post({ action: 'login', email, name });
   }
 
-  async saveEntry(entry) {
-    return this._post({ action: 'save', entry });
+  // Load all entries + currentWeek for a specific user
+  async loadAll(email) {
+    return this._post({ action: 'load', email });
   }
 
-  async deleteEntry(entryId) {
-    return this._post({ action: 'delete', entryId });
+  // Save an entry for a specific user
+  async saveEntry(email, entry) {
+    return this._post({ action: 'save', email, entry });
   }
 
-  async saveCurrentWeek(currentWeek) {
-    return this._post({ action: 'saveCurrent', data: currentWeek });
+  // Delete an entry for a specific user
+  async deleteEntry(email, entryId) {
+    return this._post({ action: 'delete', email, entryId });
+  }
+
+  // Save current week values for a specific user
+  async saveCurrentWeek(email, currentWeek) {
+    return this._post({ action: 'saveCurrent', email, data: currentWeek });
   }
 }
 

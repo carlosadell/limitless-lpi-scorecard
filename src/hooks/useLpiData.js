@@ -1,11 +1,15 @@
 import { useState, useCallback, useEffect } from 'react';
 import { sheetsService } from '../services/googleSheets';
 
-const STORAGE_KEY = 'limitless-lpi-data';
+const STORAGE_PREFIX = 'limitless-lpi-';
 
-function loadData() {
+function getStorageKey(email) {
+  return STORAGE_PREFIX + (email || 'anonymous');
+}
+
+function loadData(email) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(email));
     if (!raw) return { entries: [], currentWeek: {} };
     return JSON.parse(raw);
   } catch {
@@ -13,26 +17,26 @@ function loadData() {
   }
 }
 
-function saveData(data) {
+function saveData(email, data) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(getStorageKey(email), JSON.stringify(data));
   } catch (e) {
     console.error('Failed to save LPI data:', e);
   }
 }
 
-export function useLpiData() {
-  const [data, setData] = useState(loadData);
+export function useLpiData(userEmail) {
+  const [data, setData] = useState(() => loadData(userEmail));
   const [syncing, setSyncing] = useState(false);
 
-  // On mount: try to load from Google Sheets (if enabled)
+  // On mount or email change: try to load from Google Sheets (if enabled)
   useEffect(() => {
-    if (!sheetsService.isEnabled()) return;
+    if (!sheetsService.isEnabled() || !userEmail) return;
     let cancelled = false;
 
     async function syncFromSheets() {
       setSyncing(true);
-      const remote = await sheetsService.loadAll();
+      const remote = await sheetsService.loadAll(userEmail);
       if (remote && !cancelled) {
         const merged = {
           entries: remote.entries || [],
@@ -41,7 +45,7 @@ export function useLpiData() {
         // Only overwrite local if remote has data
         if (merged.entries.length > 0 || Object.keys(merged.currentWeek).length > 0) {
           setData(merged);
-          saveData(merged);
+          saveData(userEmail, merged);
         }
       }
       if (!cancelled) setSyncing(false);
@@ -49,7 +53,7 @@ export function useLpiData() {
 
     syncFromSheets();
     return () => { cancelled = true; };
-  }, []);
+  }, [userEmail]);
 
   const updateCurrentWeek = useCallback((kpiId, value) => {
     setData(prev => {
@@ -57,14 +61,14 @@ export function useLpiData() {
         ...prev,
         currentWeek: { ...prev.currentWeek, [kpiId]: value },
       };
-      saveData(next);
-      // Debounced sync to Google Sheets (fire and forget)
-      if (sheetsService.isEnabled()) {
-        sheetsService.saveCurrentWeek(next.currentWeek);
+      saveData(userEmail, next);
+      // Sync to Google Sheets (fire and forget)
+      if (sheetsService.isEnabled() && userEmail) {
+        sheetsService.saveCurrentWeek(userEmail, next.currentWeek);
       }
       return next;
     });
-  }, []);
+  }, [userEmail]);
 
   const submitEntry = useCallback((cadence) => {
     setData(prev => {
@@ -78,25 +82,25 @@ export function useLpiData() {
         ...prev,
         entries: [entry, ...prev.entries],
       };
-      saveData(next);
+      saveData(userEmail, next);
       // Sync to Google Sheets
-      if (sheetsService.isEnabled()) {
-        sheetsService.saveEntry(entry);
+      if (sheetsService.isEnabled() && userEmail) {
+        sheetsService.saveEntry(userEmail, entry);
       }
       return next;
     });
-  }, []);
+  }, [userEmail]);
 
   const clearCurrentWeek = useCallback(() => {
     setData(prev => {
       const next = { ...prev, currentWeek: {} };
-      saveData(next);
-      if (sheetsService.isEnabled()) {
-        sheetsService.saveCurrentWeek({});
+      saveData(userEmail, next);
+      if (sheetsService.isEnabled() && userEmail) {
+        sheetsService.saveCurrentWeek(userEmail, {});
       }
       return next;
     });
-  }, []);
+  }, [userEmail]);
 
   const deleteEntry = useCallback((entryId) => {
     setData(prev => {
@@ -104,19 +108,19 @@ export function useLpiData() {
         ...prev,
         entries: prev.entries.filter(e => e.id !== entryId),
       };
-      saveData(next);
-      if (sheetsService.isEnabled()) {
-        sheetsService.deleteEntry(entryId);
+      saveData(userEmail, next);
+      if (sheetsService.isEnabled() && userEmail) {
+        sheetsService.deleteEntry(userEmail, entryId);
       }
       return next;
     });
-  }, []);
+  }, [userEmail]);
 
   const resetAll = useCallback(() => {
     const fresh = { entries: [], currentWeek: {} };
-    saveData(fresh);
+    saveData(userEmail, fresh);
     setData(fresh);
-  }, []);
+  }, [userEmail]);
 
   return {
     entries: data.entries,
