@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <!-- Red glow gradient -->
+    <radialGradient id="glow1" cx="50%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#FF3333" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#FF3333" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#FF3333" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Bottom right glow -->
+    <radialGradient id="glow2" cx="85%" cy="95%" r="50%">
+      <stop offset="0%" stop-color="#FF3333" stop-opacity="0.18"/>
+      <stop offset="60%" stop-color="#FF3333" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#FF3333" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Blue accent -->
+    <radialGradient id="glow3" cx="5%" cy="60%" r="40%">
+      <stop offset="0%" stop-color="#2D9CDB" stop-opacity="0.12"/>
+      <stop offset="70%" stop-color="#2D9CDB" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#2D9CDB" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Line glow filter -->
+    <filter id="lineGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+    </filter>
+    <!-- Dot pattern -->
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="0.8" fill="white" opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <!-- Base -->
+  <rect width="1920" height="1080" fill="#070709"/>
+
+  <!-- Glows -->
+  <rect width="1920" height="1080" fill="url(#glow1)"/>
+  <rect width="1920" height="1080" fill="url(#glow2)"/>
+  <rect width="1920" height="1080" fill="url(#glow3)"/>
+
+  <!-- Geometric angular lines -->
+  <g opacity="0.12" filter="url(#lineGlow)">
+    <!-- Top-left converging lines -->
+    <line x1="0" y1="0" x2="800" y2="600" stroke="#FF3333" stroke-width="0.8"/>
+    <line x1="200" y1="0" x2="900" y2="700" stroke="#FF3333" stroke-width="0.5"/>
+    <line x1="0" y1="150" x2="700" y2="650" stroke="#FF3333" stroke-width="0.6"/>
+
+    <!-- Top-right angles -->
+    <line x1="1920" y1="0" x2="1100" y2="500" stroke="#FF3333" stroke-width="0.7"/>
+    <line x1="1920" y1="100" x2="1200" y2="600" stroke="#FF3333" stroke-width="0.4"/>
+    <line x1="1700" y1="0" x2="1000" y2="550" stroke="#FF3333" stroke-width="0.5"/>
+
+    <!-- Bottom crossing -->
+    <line x1="0" y1="1080" x2="960" y2="400" stroke="#FF3333" stroke-width="0.6"/>
+    <line x1="1920" y1="1080" x2="960" y2="400" stroke="#FF3333" stroke-width="0.6"/>
+
+    <!-- Horizontal accent lines -->
+    <line x1="300" y1="350" x2="1620" y2="350" stroke="#FF3333" stroke-width="0.3" opacity="0.6"/>
+    <line x1="400" y1="700" x2="1520" y2="700" stroke="#FF3333" stroke-width="0.3" opacity="0.5"/>
+  </g>
+
+  <!-- Soft large orbs -->
+  <circle cx="960" cy="200" r="300" fill="#FF3333" opacity="0.04" filter="url(#softGlow)"/>
+  <circle cx="200" cy="800" r="200" fill="#2D9CDB" opacity="0.03" filter="url(#softGlow)"/>
+  <circle cx="1700" cy="900" r="250" fill="#FF3333" opacity="0.035" filter="url(#softGlow)"/>
+
+  <!-- Diamond/angular shapes -->
+  <g opacity="0.06">
+    <polygon points="960,150 1060,350 960,550 860,350" fill="none" stroke="#FF3333" stroke-width="1"/>
+    <polygon points="960,200 1030,340 960,480 890,340" fill="none" stroke="#FF3333" stroke-width="0.5"/>
+    <polygon points="300,600 380,750 300,900 220,750" fill="none" stroke="#2D9CDB" stroke-width="0.7"/>
+    <polygon points="1600,400 1680,550 1600,700 1520,550" fill="none" stroke="#FF3333" stroke-width="0.7"/>
+  </g>
+
+  <!-- Small accent dots at intersections -->
+  <g opacity="0.2">
+    <circle cx="960" cy="400" r="3" fill="#FF3333"/>
+    <circle cx="960" cy="350" r="2" fill="#FF3333"/>
+    <circle cx="800" cy="600" r="2" fill="#FF3333"/>
+    <circle cx="1100" cy="500" r="2" fill="#FF3333"/>
+    <circle cx="300" cy="750" r="2" fill="#2D9CDB"/>
+    <circle cx="1600" cy="550" r="2" fill="#FF3333"/>
+  </g>
+
+  <!-- Dot grid overlay -->
+  <rect width="1920" height="1080" fill="url(#dots)" opacity="0.5"/>
+
+  <!-- Top edge highlight -->
+  <rect x="0" y="0" width="1920" height="1" fill="#FF3333" opacity="0.3"/>
+</svg>
