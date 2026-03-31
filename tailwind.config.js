@@ -5,10 +5,10 @@ export default {
     extend: {
       colors: {
         brand: {
-          black: '#0A0A0A',
-          dark: '#111111',
-          card: '#1A1A1A',
-          border: '#2A2A2A',
+          black: '#0B0D10',
+          dark: '#12151A',
+          card: '#181C23',
+          border: '#252A33',
           red: '#FF3333',
           redGlow: '#FF4444',
           redDark: '#CC0000',
@@ -18,8 +18,8 @@ export default {
           green: '#22C55E',
           yellow: '#F59E0B',
           white: '#FFFFFF',
-          gray: '#9CA3AF',
-          lightGray: '#D1D5DB',
+          gray: '#8B95A5',
+          lightGray: '#C5CDD8',
         }
       },
       fontFamily: {

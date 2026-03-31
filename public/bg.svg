@@ -12,8 +12,8 @@
     </filter>
   </defs>
 
-  <!-- Deep black base -->
-  <rect width="1920" height="1080" fill="#050507"/>
+  <!-- Deep dark-blue base -->
+  <rect width="1920" height="1080" fill="#0B0D10"/>
 
   <!-- Aggressive red atmosphere -->
   <ellipse cx="960" cy="0" rx="900" ry="500" fill="#FF2222" opacity="0.08" filter="url(#heavyGlow)"/>

@@ -177,7 +177,7 @@ export default function DashboardView({ currentValues, entries, user }) {
 
       {/* Action Required */}
       {redKpis.length > 0 && (
-        <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+        <div className="bg-brand-card border border-red-500/20 rounded-2xl p-6">
           <h2 className="font-display text-base font-bold uppercase tracking-wider text-red-400 mb-4 flex items-center gap-2">
             <AlertTriangle size={18} />
             Action Required — {redKpis.length} KPI{redKpis.length > 1 ? 's' : ''}
