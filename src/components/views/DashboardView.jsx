@@ -1,5 +1,6 @@
 import { SECTIONS, evaluateKpi, STATUS_COLORS } from '../../data/kpiDefinitions';
 import StatusBadge from '../ui/StatusBadge';
+import ResourcesSection from '../ui/ResourcesSection';
 import { Activity, TrendingUp, RefreshCw, DollarSign, Zap, Star, AlertTriangle } from 'lucide-react';
 
 const ICON_MAP = {
@@ -202,6 +203,9 @@ export default function DashboardView({ currentValues, entries, user }) {
 
       {/* Leading Indicators */}
       <SectionSummary section={SECTIONS.leading} currentValues={currentValues} />
+
+      {/* Resources */}
+      <ResourcesSection />
 
       {/* FFS Truth */}
       <div className="bg-brand-card rounded-2xl p-6 sm:p-8 border border-brand-border text-center">

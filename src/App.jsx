@@ -10,6 +10,7 @@ import AuthScreen from './components/views/AuthScreen';
 import { useLpiData } from './hooks/useLpiData';
 import { useDailyLog } from './hooks/useDailyLog';
 import { sheetsService } from './services/googleSheets';
+import PromoPopup from './components/ui/PromoPopup';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const AUTH_KEY = 'limitless-lpi-user';
@@ -190,6 +191,9 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Promo Popup */}
+      <PromoPopup />
 
       {/* Toast */}
       {toast && (
