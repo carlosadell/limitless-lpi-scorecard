@@ -1,62 +1,74 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-  <rect width="1920" height="1080" fill="#070709"/>
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="heavyGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12"/>
+    </filter>
+  </defs>
 
-  <g font-family="'Oswald', 'Arial Black', sans-serif" font-weight="700" text-transform="uppercase">
+  <!-- Deep black base -->
+  <rect width="1920" height="1080" fill="#050507"/>
 
-    <!-- CENTER HERO WORDS -->
-    <text x="960" y="480" text-anchor="middle" font-size="140" fill="#FF3333" opacity="0.07" letter-spacing="20">LIMITLESS</text>
-    <text x="960" y="620" text-anchor="middle" font-size="90" fill="#FFFFFF" opacity="0.04" letter-spacing="12">PERFORMANCE</text>
+  <!-- Aggressive red atmosphere -->
+  <ellipse cx="960" cy="0" rx="900" ry="500" fill="#FF2222" opacity="0.08" filter="url(#heavyGlow)"/>
+  <ellipse cx="1700" cy="1000" rx="500" ry="400" fill="#FF2222" opacity="0.06" filter="url(#heavyGlow)"/>
+  <ellipse cx="100" cy="800" rx="400" ry="350" fill="#FF2222" opacity="0.04" filter="url(#heavyGlow)"/>
 
-    <!-- LARGE ACCENT WORDS -->
-    <text x="960" y="340" text-anchor="middle" font-size="55" fill="#FF3333" opacity="0.055" letter-spacing="8">CONVERSION</text>
-    <text x="960" y="740" text-anchor="middle" font-size="60" fill="#FFFFFF" opacity="0.035" letter-spacing="10">INDICATORS</text>
-    <text x="480" y="540" text-anchor="middle" font-size="65" fill="#FF3333" opacity="0.05" letter-spacing="6">GROWTH</text>
-    <text x="1450" y="520" text-anchor="middle" font-size="60" fill="#FF3333" opacity="0.05" letter-spacing="6">RESULTS</text>
+  <g font-family="'Oswald', 'Impact', 'Arial Black', sans-serif" font-weight="700" text-transform="uppercase" letter-spacing="4">
 
-    <!-- MEDIUM WORDS - LEFT SIDE -->
-    <text x="180" y="180" text-anchor="start" font-size="38" fill="#FFFFFF" opacity="0.03" letter-spacing="5">STRATEGY</text>
-    <text x="120" y="300" text-anchor="start" font-size="45" fill="#FF3333" opacity="0.045" letter-spacing="4">CLARITY</text>
-    <text x="80" y="420" text-anchor="start" font-size="32" fill="#FFFFFF" opacity="0.03" letter-spacing="6">SCHEDULE</text>
-    <text x="200" y="660" text-anchor="start" font-size="40" fill="#FF3333" opacity="0.04" letter-spacing="5">CONVICTION</text>
-    <text x="140" y="780" text-anchor="start" font-size="34" fill="#FFFFFF" opacity="0.025" letter-spacing="4">PRODUCTION</text>
-    <text x="100" y="900" text-anchor="start" font-size="42" fill="#FF3333" opacity="0.04" letter-spacing="3">NUMBERS</text>
-    <text x="250" y="1000" text-anchor="start" font-size="30" fill="#FFFFFF" opacity="0.025" letter-spacing="5">PROCESS</text>
+    <!-- ██ MASSIVE CENTER WORDS ██ -->
+    <text x="960" y="460" text-anchor="middle" font-size="180" fill="#FF3333" opacity="0.09" letter-spacing="25" filter="url(#glow)">LIMITLESS</text>
+    <text x="960" y="640" text-anchor="middle" font-size="100" fill="#FFFFFF" opacity="0.06" letter-spacing="18">PERFORMANCE</text>
 
-    <!-- MEDIUM WORDS - RIGHT SIDE -->
-    <text x="1800" y="160" text-anchor="end" font-size="36" fill="#FF3333" opacity="0.04" letter-spacing="5">COACHING</text>
-    <text x="1750" y="290" text-anchor="end" font-size="42" fill="#FFFFFF" opacity="0.03" letter-spacing="4">DECISIONS</text>
-    <text x="1820" y="410" text-anchor="end" font-size="34" fill="#FF3333" opacity="0.04" letter-spacing="6">HYGIENE</text>
-    <text x="1700" y="660" text-anchor="end" font-size="38" fill="#FFFFFF" opacity="0.03" letter-spacing="4">COLLECTIONS</text>
-    <text x="1780" y="780" text-anchor="end" font-size="44" fill="#FF3333" opacity="0.045" letter-spacing="3">SCALE</text>
-    <text x="1820" y="880" text-anchor="end" font-size="30" fill="#FFFFFF" opacity="0.025" letter-spacing="5">OVERHEAD</text>
-    <text x="1700" y="990" text-anchor="end" font-size="36" fill="#FF3333" opacity="0.035" letter-spacing="4">PROFIT</text>
+    <!-- ██ LARGE POWER WORDS ██ -->
+    <text x="960" y="300" text-anchor="middle" font-size="70" fill="#FF3333" opacity="0.08" letter-spacing="12">CRUSH YOUR TARGETS</text>
+    <text x="960" y="780" text-anchor="middle" font-size="75" fill="#FF3333" opacity="0.07" letter-spacing="10">FREEDOM</text>
+    <text x="400" y="540" text-anchor="middle" font-size="80" fill="#FFFFFF" opacity="0.05" letter-spacing="8" transform="rotate(-90 400 540)">GROWTH</text>
+    <text x="1520" y="540" text-anchor="middle" font-size="80" fill="#FFFFFF" opacity="0.05" letter-spacing="8" transform="rotate(90 1520 540)">LEGACY</text>
 
-    <!-- SMALLER SCATTERED WORDS -->
-    <text x="400" y="140" text-anchor="middle" font-size="26" fill="#FFFFFF" opacity="0.02" letter-spacing="4">IMPLEMENT</text>
-    <text x="700" y="200" text-anchor="middle" font-size="30" fill="#FF3333" opacity="0.035" letter-spacing="3">DATA</text>
-    <text x="1200" y="180" text-anchor="middle" font-size="28" fill="#FFFFFF" opacity="0.025" letter-spacing="5">TEAM</text>
-    <text x="1500" y="240" text-anchor="middle" font-size="24" fill="#FF3333" opacity="0.03" letter-spacing="4">MEASURE</text>
+    <!-- ██ BOLD WORDS - SCATTERED ██ -->
+    <text x="280" y="200" text-anchor="middle" font-size="50" fill="#FF3333" opacity="0.07" letter-spacing="6">DOMINATE</text>
+    <text x="1650" y="180" text-anchor="middle" font-size="48" fill="#FFFFFF" opacity="0.05" letter-spacing="5">EXECUTE</text>
+    <text x="250" y="380" text-anchor="middle" font-size="44" fill="#FFFFFF" opacity="0.045" letter-spacing="5">CONVICTION</text>
+    <text x="1680" y="360" text-anchor="middle" font-size="46" fill="#FF3333" opacity="0.065" letter-spacing="4">SCALE</text>
+    <text x="300" y="720" text-anchor="middle" font-size="52" fill="#FF3333" opacity="0.06" letter-spacing="5">WEAPONIZE</text>
+    <text x="1620" y="700" text-anchor="middle" font-size="50" fill="#FFFFFF" opacity="0.045" letter-spacing="6">SYSTEMS</text>
+    <text x="220" y="900" text-anchor="middle" font-size="46" fill="#FFFFFF" opacity="0.04" letter-spacing="4">PROTOCOL</text>
+    <text x="1700" y="880" text-anchor="middle" font-size="48" fill="#FF3333" opacity="0.06" letter-spacing="5">PROFIT</text>
 
-    <text x="350" y="850" text-anchor="middle" font-size="28" fill="#FF3333" opacity="0.03" letter-spacing="3">ACHIEVE</text>
-    <text x="650" y="900" text-anchor="middle" font-size="24" fill="#FFFFFF" opacity="0.02" letter-spacing="5">OPTIMIZE</text>
-    <text x="1100" y="870" text-anchor="middle" font-size="26" fill="#FF3333" opacity="0.03" letter-spacing="4">REVENUE</text>
-    <text x="1350" y="940" text-anchor="middle" font-size="22" fill="#FFFFFF" opacity="0.02" letter-spacing="5">OPERATIONS</text>
+    <!-- ██ MEDIUM INTENSITY WORDS ██ -->
+    <text x="600" y="160" text-anchor="middle" font-size="36" fill="#FF3333" opacity="0.055" letter-spacing="6">CONVERSION</text>
+    <text x="1300" y="140" text-anchor="middle" font-size="34" fill="#FFFFFF" opacity="0.04" letter-spacing="5">COACHING</text>
+    <text x="700" y="870" text-anchor="middle" font-size="38" fill="#FFFFFF" opacity="0.04" letter-spacing="4">EXPANSION</text>
+    <text x="1250" y="890" text-anchor="middle" font-size="36" fill="#FF3333" opacity="0.05" letter-spacing="5">REVENUE</text>
+    <text x="150" y="580" text-anchor="middle" font-size="32" fill="#FF3333" opacity="0.05" letter-spacing="4">CLARITY</text>
+    <text x="1800" y="540" text-anchor="middle" font-size="34" fill="#FFFFFF" opacity="0.035" letter-spacing="4">NUMBERS</text>
+    <text x="500" y="680" text-anchor="middle" font-size="30" fill="#FFFFFF" opacity="0.035" letter-spacing="5">COLLECTIONS</text>
+    <text x="1400" y="660" text-anchor="middle" font-size="32" fill="#FF3333" opacity="0.045" letter-spacing="4">LEVERAGE</text>
 
-    <text x="580" y="760" text-anchor="middle" font-size="22" fill="#FFFFFF" opacity="0.02" letter-spacing="3">ACCEPTANCE</text>
-    <text x="1300" y="760" text-anchor="middle" font-size="24" fill="#FF3333" opacity="0.025" letter-spacing="4">LEVERAGE</text>
-
-    <!-- TINY FILL WORDS -->
-    <text x="300" y="480" text-anchor="middle" font-size="18" fill="#FFFFFF" opacity="0.015" letter-spacing="3">REACTIVATION</text>
-    <text x="1600" y="480" text-anchor="middle" font-size="20" fill="#FFFFFF" opacity="0.015" letter-spacing="3">CAPACITY</text>
-    <text x="750" y="820" text-anchor="middle" font-size="18" fill="#FF3333" opacity="0.02" letter-spacing="4">FFS</text>
-    <text x="1150" y="280" text-anchor="middle" font-size="20" fill="#FF3333" opacity="0.025" letter-spacing="3">FREEDOM</text>
-    <text x="500" y="280" text-anchor="middle" font-size="22" fill="#FFFFFF" opacity="0.02" letter-spacing="3">VELOCITY</text>
-    <text x="800" y="680" text-anchor="middle" font-size="20" fill="#FF3333" opacity="0.02" letter-spacing="4">ENERGY</text>
-    <text x="1100" y="680" text-anchor="middle" font-size="18" fill="#FFFFFF" opacity="0.015" letter-spacing="3">REFERRAL</text>
-    <text x="400" y="380" text-anchor="middle" font-size="19" fill="#FF3333" opacity="0.02" letter-spacing="3">DENTAL</text>
-    <text x="1550" y="370" text-anchor="middle" font-size="19" fill="#FFFFFF" opacity="0.015" letter-spacing="3">PRACTICE</text>
-    <text x="680" y="400" text-anchor="middle" font-size="16" fill="#FFFFFF" opacity="0.015" letter-spacing="3">RETENTION</text>
-    <text x="1250" y="420" text-anchor="middle" font-size="17" fill="#FF3333" opacity="0.02" letter-spacing="3">EFFICIENCY</text>
+    <!-- ██ SMALLER FILL WORDS ██ -->
+    <text x="750" y="240" text-anchor="middle" font-size="26" fill="#FFFFFF" opacity="0.03" letter-spacing="4">INDICATORS</text>
+    <text x="1150" y="250" text-anchor="middle" font-size="28" fill="#FF3333" opacity="0.04" letter-spacing="3">DATA</text>
+    <text x="480" y="430" text-anchor="middle" font-size="24" fill="#FF3333" opacity="0.04" letter-spacing="3">ENERGY</text>
+    <text x="1440" y="440" text-anchor="middle" font-size="26" fill="#FFFFFF" opacity="0.03" letter-spacing="4">MEASURE</text>
+    <text x="650" y="960" text-anchor="middle" font-size="28" fill="#FF3333" opacity="0.04" letter-spacing="3">DENTAL</text>
+    <text x="1300" y="980" text-anchor="middle" font-size="24" fill="#FFFFFF" opacity="0.03" letter-spacing="4">FFS</text>
+    <text x="900" y="950" text-anchor="middle" font-size="22" fill="#FFFFFF" opacity="0.025" letter-spacing="3">PRACTICE</text>
+    <text x="1050" y="1020" text-anchor="middle" font-size="26" fill="#FF3333" opacity="0.035" letter-spacing="3">ACHIEVE</text>
+    <text x="400" y="1000" text-anchor="middle" font-size="24" fill="#FFFFFF" opacity="0.025" letter-spacing="3">HYGIENE</text>
+    <text x="1550" y="1010" text-anchor="middle" font-size="22" fill="#FF3333" opacity="0.03" letter-spacing="4">OVERHEAD</text>
+    <text x="800" y="100" text-anchor="middle" font-size="22" fill="#FFFFFF" opacity="0.025" letter-spacing="3">VELOCITY</text>
+    <text x="1100" y="80" text-anchor="middle" font-size="24" fill="#FF3333" opacity="0.035" letter-spacing="3">RESULTS</text>
 
   </g>
+
+  <!-- Subtle red line accents -->
+  <line x1="0" y1="0" x2="1920" y2="0" stroke="#FF3333" opacity="0.4" stroke-width="2"/>
+  <line x1="0" y1="1079" x2="1920" y2="1079" stroke="#FF3333" opacity="0.15" stroke-width="1"/>
 </svg>
