@@ -21,11 +21,11 @@ body {
   background-repeat: no-repeat;
 }
 
-/* Glass-effect cards */
+/* Cards — solid enough to read, slight transparency at edges */
 .bg-brand-card {
-  background-color: rgba(26, 26, 26, 0.75) !important;
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background-color: rgba(22, 22, 22, 0.95) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Ensure content is above everything */
