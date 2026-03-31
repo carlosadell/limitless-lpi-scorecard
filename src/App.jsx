@@ -149,7 +149,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header activeView={activeView} setActiveView={setActiveView} user={user} onLogout={handleLogout} />
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 py-8">

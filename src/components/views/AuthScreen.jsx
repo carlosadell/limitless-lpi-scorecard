@@ -40,7 +40,7 @@ export default function AuthScreen({ onLogin, loading, error: externalError }) {
   };
 
   return (
-    <div className="min-h-screen bg-brand-black flex flex-col items-center justify-center px-5">
+    <div className="min-h-screen flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-md animate-fade-in">
         {/* Logo + Branding */}
         <div className="text-center mb-10">
