@@ -12,26 +12,64 @@ const ICON_MAP = {
 
 const COLOR_MAP = {
   red: {
-    bg: 'bg-brand-red/10',
-    border: 'border-brand-red/25',
-    text: 'text-brand-red',
-    hover: 'hover:border-brand-red/50',
+    pill: 'bg-gradient-to-r from-red-500/20 to-red-600/10',
+    border: 'border-red-500/30',
+    iconBg: 'bg-red-500/20',
+    text: 'text-red-400',
+    hoverBorder: 'hover:border-red-500/60',
+    hoverShadow: 'hover:shadow-red-500/10',
+    glow: 'group-hover:text-red-300',
   },
   blue: {
-    bg: 'bg-brand-blue/10',
-    border: 'border-brand-blue/25',
-    text: 'text-brand-blue',
-    hover: 'hover:border-brand-blue/50',
+    pill: 'bg-gradient-to-r from-blue-500/20 to-blue-600/10',
+    border: 'border-blue-500/30',
+    iconBg: 'bg-blue-500/20',
+    text: 'text-blue-400',
+    hoverBorder: 'hover:border-blue-500/60',
+    hoverShadow: 'hover:shadow-blue-500/10',
+    glow: 'group-hover:text-blue-300',
   },
   green: {
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/25',
-    text: 'text-green-400',
-    hover: 'hover:border-green-500/50',
+    pill: 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/10',
+    border: 'border-emerald-500/30',
+    iconBg: 'bg-emerald-500/20',
+    text: 'text-emerald-400',
+    hoverBorder: 'hover:border-emerald-500/60',
+    hoverShadow: 'hover:shadow-emerald-500/10',
+    glow: 'group-hover:text-emerald-300',
   },
 };
 
-export default function ResourcesSection() {
+export default function ResourcesSection({ compact }) {
+  if (compact) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 animate-fade-in">
+        {RESOURCES.map(resource => {
+          const Icon = ICON_MAP[resource.icon] || Rocket;
+          const colors = COLOR_MAP[resource.color] || COLOR_MAP.red;
+
+          return (
+            <a
+              key={resource.id}
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative rounded-xl p-3 border ${colors.border} ${colors.hoverBorder} ${colors.pill} transition-all duration-200 no-underline flex flex-col items-center text-center gap-2 hover:shadow-lg ${colors.hoverShadow} hover:-translate-y-0.5`}
+            >
+              <div className={`w-8 h-8 rounded-lg ${colors.iconBg} flex items-center justify-center`}>
+                <Icon size={15} className={`${colors.text} ${colors.glow} transition-colors`} />
+              </div>
+              <p className={`text-[11px] font-bold text-white leading-tight ${colors.glow} transition-colors`}>
+                {resource.title}
+              </p>
+              <ExternalLink size={10} className="absolute top-2 right-2 text-brand-gray opacity-0 group-hover:opacity-60 transition-opacity" />
+            </a>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2.5">
@@ -55,9 +93,9 @@ export default function ResourcesSection() {
               href={resource.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`bg-brand-card rounded-xl p-4 border ${colors.border} ${colors.hover} transition-all duration-200 group flex items-start gap-3.5 no-underline`}
+              className={`bg-brand-card rounded-xl p-4 border ${colors.border} ${colors.hoverBorder} transition-all duration-200 group flex items-start gap-3.5 no-underline hover:shadow-lg ${colors.hoverShadow}`}
             >
-              <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-10 h-10 rounded-lg ${colors.iconBg} flex items-center justify-center flex-shrink-0`}>
                 <Icon size={18} className={colors.text} />
               </div>
               <div className="flex-1 min-w-0">

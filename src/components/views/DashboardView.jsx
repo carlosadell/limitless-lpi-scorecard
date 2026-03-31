@@ -133,7 +133,7 @@ function ScoreRing({ sections, currentValues }) {
   );
 }
 
-export default function DashboardView({ currentValues, entries, user }) {
+export default function DashboardView({ currentValues, entries }) {
   const allSections = [...SECTIONS.weekly, ...SECTIONS.monthly];
   const lastEntry = entries.length > 0 ? entries[0] : null;
 
@@ -153,18 +153,8 @@ export default function DashboardView({ currentValues, entries, user }) {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* User Welcome */}
-      {user && (
-        <div className="bg-brand-card rounded-2xl p-5 sm:p-6 border border-brand-border flex items-center gap-4">
-          <div className="w-11 h-11 rounded-full bg-brand-red/15 border border-brand-red/30 flex items-center justify-center flex-shrink-0">
-            <span className="text-lg font-bold text-brand-red">{user.name.charAt(0).toUpperCase()}</span>
-          </div>
-          <div>
-            <p className="text-base font-bold text-white">Welcome back, {user.name.split(' ')[0]}</p>
-            <p className="text-xs text-brand-gray mt-0.5">{user.email}</p>
-          </div>
-        </div>
-      )}
+      {/* Quick Resources */}
+      <ResourcesSection compact />
 
       {/* Score Ring */}
       <div className="bg-brand-card rounded-2xl p-8 sm:p-10 border border-brand-border glow-blue">
@@ -203,9 +193,6 @@ export default function DashboardView({ currentValues, entries, user }) {
 
       {/* Leading Indicators */}
       <SectionSummary section={SECTIONS.leading} currentValues={currentValues} />
-
-      {/* Resources */}
-      <ResourcesSection />
 
       {/* FFS Truth */}
       <div className="bg-brand-card rounded-2xl p-6 sm:p-8 border border-brand-border text-center">

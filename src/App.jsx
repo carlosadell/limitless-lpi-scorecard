@@ -155,7 +155,7 @@ export default function App() {
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 py-8">
         {activeView === 'dashboard' && (
-          <DashboardView currentValues={currentWeek} entries={entries} user={user} />
+          <DashboardView currentValues={currentWeek} entries={entries} />
         )}
         {activeView === 'daily' && (
           <DailyView
