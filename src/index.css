@@ -29,30 +29,30 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    /* Top-center red glow */
-    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 51, 51, 0.06) 0%, transparent 70%),
-    /* Bottom-left warm glow */
-    radial-gradient(ellipse 50% 50% at 10% 100%, rgba(255, 51, 51, 0.04) 0%, transparent 60%),
-    /* Right-center subtle accent */
-    radial-gradient(ellipse 40% 60% at 95% 40%, rgba(45, 156, 219, 0.03) 0%, transparent 60%),
-    /* Centered subtle vignette */
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(26, 26, 26, 0.5) 0%, transparent 70%);
+    /* Top-center dramatic red glow */
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 51, 51, 0.18) 0%, transparent 60%),
+    /* Bottom-right warm red bloom */
+    radial-gradient(ellipse 60% 60% at 90% 100%, rgba(255, 51, 51, 0.12) 0%, transparent 50%),
+    /* Left-center cool blue accent */
+    radial-gradient(ellipse 50% 70% at 0% 50%, rgba(45, 156, 219, 0.08) 0%, transparent 50%),
+    /* Center subtle lift */
+    radial-gradient(ellipse 100% 100% at 50% 50%, rgba(30, 30, 30, 0.6) 0%, transparent 60%),
+    /* Deep base gradient */
+    linear-gradient(180deg, #0A0A0A 0%, #0F0F0F 40%, #0A0A0A 100%);
 }
 
-/* Subtle grid texture overlay */
+/* Subtle dot grid texture */
 #root::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.025;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 70%);
+  opacity: 0.08;
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 20%, transparent 70%);
 }
 
 /* Ensure content sits above the background layers */
@@ -102,11 +102,6 @@ input[type="number"] {
 @keyframes pulse-blue {
   0%, 100% { box-shadow: 0 0 0 0 rgba(45, 156, 219, 0.3); }
   50% { box-shadow: 0 0 16px 4px rgba(45, 156, 219, 0.12); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 .animate-fade-in {
