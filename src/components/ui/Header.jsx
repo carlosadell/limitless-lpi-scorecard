@@ -10,7 +10,7 @@ const tabs = [
 
 export default function Header({ activeView, setActiveView, user, onLogout }) {
   return (
-    <header className="sticky top-0 z-50 bg-brand-black/95 backdrop-blur-md border-b border-brand-border">
+    <header className="sticky top-0 z-50 bg-[rgba(7,7,9,0.8)] backdrop-blur-xl border-b border-brand-border">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 pt-5 pb-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

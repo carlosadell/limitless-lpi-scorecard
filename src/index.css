@@ -9,56 +9,48 @@
 }
 
 body {
-  background: #0A0A0A;
   color: #fff;
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  background-color: #070709;
+  background-image:
+    /* Big red spotlight from top */
+    radial-gradient(ellipse 90% 40% at 50% -5%, rgba(255, 30, 30, 0.22) 0%, transparent 55%),
+    /* Bottom-right warm glow */
+    radial-gradient(ellipse 50% 50% at 85% 95%, rgba(255, 40, 40, 0.14) 0%, transparent 50%),
+    /* Left blue hint */
+    radial-gradient(ellipse 40% 50% at 5% 60%, rgba(45, 140, 220, 0.10) 0%, transparent 50%),
+    /* Center midtone lift */
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(22, 22, 28, 0.8) 0%, transparent 70%);
+  background-attachment: fixed;
 }
 
-/* ─── Premium layered background ─────────────────────────────────── */
+/* Noise grain overlay for texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Make cards slightly translucent so background bleeds through */
+.bg-brand-card {
+  background-color: rgba(26, 26, 26, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Ensure main content is above noise layer */
 #root {
   position: relative;
-  min-height: 100vh;
-}
-
-#root::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    /* Top-center dramatic red glow */
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 51, 51, 0.18) 0%, transparent 60%),
-    /* Bottom-right warm red bloom */
-    radial-gradient(ellipse 60% 60% at 90% 100%, rgba(255, 51, 51, 0.12) 0%, transparent 50%),
-    /* Left-center cool blue accent */
-    radial-gradient(ellipse 50% 70% at 0% 50%, rgba(45, 156, 219, 0.08) 0%, transparent 50%),
-    /* Center subtle lift */
-    radial-gradient(ellipse 100% 100% at 50% 50%, rgba(30, 30, 30, 0.6) 0%, transparent 60%),
-    /* Deep base gradient */
-    linear-gradient(180deg, #0A0A0A 0%, #0F0F0F 40%, #0A0A0A 100%);
-}
-
-/* Subtle dot grid texture */
-#root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 20%, transparent 70%);
-}
-
-/* Ensure content sits above the background layers */
-#root > * {
-  position: relative;
   z-index: 1;
+  min-height: 100vh;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────── */
