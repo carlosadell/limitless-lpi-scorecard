@@ -1,16 +1,17 @@
 import { RESOURCES } from '../../data/resources';
-import { Crown, Rocket, BookOpen, Phone, ExternalLink } from 'lucide-react';
+import { Crown, Rocket, BookOpen, Phone, Mic, ExternalLink } from 'lucide-react';
 
 const ICON_MAP = {
   crown: Crown,
   rocket: Rocket,
   book: BookOpen,
   phone: Phone,
+  mic: Mic,
 };
 
 export default function ResourcesSection() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {RESOURCES.map(resource => {
         const Icon = ICON_MAP[resource.icon] || Rocket;
 
